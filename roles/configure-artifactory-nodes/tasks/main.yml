@@ -1,0 +1,4 @@
+# (c) 2017 DataNexus Inc.  All Rights Reserved
+---
+- include: "configure-artifactory-server.yml static=no"
+- include: "add-binarystore-xml.yml static=no"

@@ -1,0 +1,59 @@
+# (c) 2017 DataNexus Inc.  All Rights Reserved
+---
+# Setup the certificates needed to handle HTTPS requests, then configure the
+# NGINX instances using the appropriate template
+- block:
+  # ensure the directory we're storing the self-signed certs in exists
+  - name: Ensure that directory for self-signed certs exists
+    file:
+      path: "/etc/artifactory/ssl"
+      state: directory
+      owner: artifactory
+      group: artifactory
+      mode: 0700
+  # if no certificates were passed in, then create self-signed certs for the target nodes
+  - name: Create artifactory self-signed certificate
+    command: openssl req -new -nodes -x509 -subj "/C={{artifactory_country | default('US')}}/ST={{artifactory_state | default('CO')}}/L={{artifactory_location | default('Denver')}}/O={{artifactory_org | default('IT')}}/CN={{artifactory_common_name | default(api_addr)}}" -days 3650 -keyout /etc/artifactory/ssl/server.key -out /etc/artifactory/ssl/server.crt -extensions v3_ca creates=/etc/artifactory/ssl/server.crt
+    when: artifactory_certificate_hash == {}
+  # set the hard and soft nofile limits to a more reasonable value for
+  # use with artifactory (without this change the artifactory service
+  # cannot be started successfully)
+  - name: Set hard and soft nofile limits for user '{{artifactory_user}}'
+    pam_limits:
+      domain: "{{artifactory_user}}"
+      limit_type: "{{item}}"
+      limit_item: nofile
+      value: 32000
+    with_items:
+      - hard
+      - soft
+  # and setup the configuration using the template
+  - name: Setup server configuration from template
+    template:
+      src: artifactory.config.template.yml.j2
+      dest: /var/opt/jfrog/artifactory/etc/artifactory.config.import.yml
+      mode: 0644
+    become_user: "{{artifactory_user}}"
+  # setup server context using the template
+  - name: Setup bootstrap configuration from template
+    template:
+      src: artifactory.config.bootstrap.xml.j2
+      dest: /var/opt/jfrog/artifactory/etc/artifactory.config.bootstrap.xml
+      mode: 0770
+    become_user: "{{artifactory_user}}"
+  # and set the login credentials for the admin user (of an `admin_password`
+  # was specified; if the `admin_password` is not specified, then the password
+  # that will be setup for the admin user is `password`)
+  - name: Setup initial security.xml file
+    copy:
+      src: security.xml
+      dest: /var/opt/jfrog/artifactory/etc/security.xml
+      mode: 0644
+    become_user: "{{artifactory_user}}"
+  - name: Setup file to import new credentials on first restart
+    template:
+      src: security.import.xml.j2
+      dest: /var/opt/jfrog/artifactory/etc/security.import.xml
+      mode: 0644
+    become_user: "{{artifactory_user}}"
+  become: true

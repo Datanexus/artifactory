@@ -1,0 +1,23 @@
+# (c) 2017 DataNexus Inc.  All Rights Reserved
+---
+# ensure that the data directory exists and replace the default binarystore.xml
+# with a new one that configures artifactory to write to that data directory
+- block:
+  # ensure that the intented data directory exists and is writeable by the
+  # artifactory user
+  - name: "Ensure {{artifactory_data_dir}}/artifactory directory exists"
+    file:
+      path: "{{artifactory_data_dir}}/artifactory"
+      state: directory
+      owner: "{{artifactory_user}}"
+      group: "{{artifactory_group}}"
+      mode: 0755
+  # and include that template to build binarystore.xml file
+  - name: "Build binarystore.xml file from template"
+    template:
+      src: binarystore.xml.j2
+      dest: "/var/opt/jfrog/artifactory/etc/binarystore.xml"
+      owner: "{{artifactory_user}}"
+      group: "{{artifactory_group}}"
+      mode: 0644
+  become: true

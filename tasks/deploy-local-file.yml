@@ -1,0 +1,26 @@
+# (c) 2017 DataNexus Inc.  All Rights Reserved
+---
+- name: Gather stat information for {{upload_filename}}
+  local_action:
+    module: stat
+    path: "{{upload_filename}}"
+  register: stat_out
+# if the file exists locally, then upload it and deploy it to the repository
+- block:
+  # copy file to remote host
+  - name: Copy {{upload_filename}} to remote host
+    copy:
+      src: "{{upload_filename}}"
+      dest: "/tmp/{{upload_filename | basename}}"
+  # use cURL command to deploy the named file to the repository (note that the
+  # Ansible uri module does not support uploading a binary file)
+  - name: Deploy {{upload_filename}} to local repository from remote host
+    command: "curl -u 'admin:{{admin_password}}' -H'X-Checksum-Sha1:{{stat_out.stat.checksum}}' -H'X-Checksum-Md5:{{stat_out.stat.md5}}' -X PUT http://localhost:{{artifactory_port}}/artifactory/{{artifactory_initial_repo_name}}/{{(artifactory_upload_folder != '') | ternary(artifactory_upload_folder + '/','')}}{{upload_filename | basename}} -T /tmp/{{upload_filename | basename}}"
+    args:
+      warn: no
+  # remove file from remote host
+  - name: Remove uploaded file from remote host
+    file:
+      path: "/tmp/{{upload_filename | basename}}"
+      state: absent
+  when: stat_out.stat.exists

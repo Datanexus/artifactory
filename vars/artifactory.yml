@@ -1,0 +1,61 @@
+# (c) 2017 DataNexus Inc.  All Rights Reserved
+#
+# Defaults that are necessary for all deployments of artifactory
+---
+application: artifactory
+
+artifactory_group: artifactory
+artifactory_user: artifactory
+
+artifactory_package_list: ["java-1.8.0-openjdk", "java-1.8.0-openjdk-devel"]
+artifactory_certificate_hash: {}
+
+# directory used to store artifacts
+artifactory_data_dir: /data
+
+# max upload size (100MB by default)
+artifactory_max_upload_size_mb: 100
+
+# name, type, and description of the initial repository created by deployment
+artifactory_initial_repo_name: 'generic-local'
+artifactory_initial_repo_type: generic
+artifactory_initial_repo_desc: 'Generic artifactory repository'
+
+# folder to upload content to under initial repository
+artifactory_upload_folder: ''
+
+# list of files to upload at the end of the playbook run
+artifactory_upload_file_list: []
+
+# time (in seconds) to wait between starting artifactory and restarting it to
+# pickup the new configuration
+artifactory_restart_interval: 10
+
+# ports to listen on
+artifactory_port: 8081
+
+# flags to set when starting the JVM used to run artifactory
+artifactory_jvm_flags: '-server -Xms512m -Xmx2g -Xss256k -XX:+UseG1GC'
+
+# path used to access private keys (defaults to the current working directory)
+private_key_path: "{{playbook_dir}}"
+
+# this variable defines the default ensemble that will be created when
+# deploying to an AWS or OpenStack environment; the value defined here will
+# result in the deployment of a single, standalone artifactory instance
+node_map:
+  - { application: artifactory, count: 1 }
+
+# and define a set of application-specific security group rules; this list of
+# dictionary entries is used when setting up an application-specific security
+# on the network used by this application; the rules defined here allow for
+# access over the internal and external subnet for:
+#
+#  - HTTP client connections via the artifactory_port (port 8081 by default)
+#
+# this set of rules should, more than likely, not be overridden; if it is
+# overridden, then care should be taken to at least maintain this default list
+# of application-specific security group rules
+application_sg_rules:
+  - { proto: tcp, from_port: "{{artifactory_port}}", to_port: "{{artifactory_port}}", cidr_ip: "{{external_subnet}}" }
+  - { proto: tcp, from_port: "{{artifactory_port}}", to_port: "{{artifactory_port}}", cidr_ip: "{{internal_subnet}}" }

@@ -1,0 +1,10 @@
+# (c) 2017 DataNexus Inc.  All Rights Reserved
+---
+# and include that template to build the repository file
+# needed to install artifactory
+- name: "Add artifactory yum repository file"
+  become: true
+  template:
+    src: bintray-jfrog-artifactory-rpms.repo.j2
+    dest: "/etc/yum.repos.d/bintray-jfrog-artifactory-rpms.repo"
+    mode: 0644

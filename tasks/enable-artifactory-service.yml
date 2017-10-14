@@ -1,0 +1,8 @@
+# (c) 2017 DataNexus Inc.  All Rights Reserved
+---
+# enable the artifactory service
+- name: Enable artifactory service on boot
+  service:
+    name: artifactory
+    enabled: yes
+  become: true

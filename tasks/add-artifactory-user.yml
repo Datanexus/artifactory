@@ -1,0 +1,14 @@
+# (c) 2017 DataNexus Inc.  All Rights Reserved
+---
+- name: Create artifactory group
+  become: true
+  group:
+    name: "{{artifactory_group}}"
+    system: yes
+- name: Create artifactory user
+  become: true
+  user:
+    name: "{{artifactory_user}}"
+    group: "{{artifactory_group}}"
+    createhome: no
+    system: yes

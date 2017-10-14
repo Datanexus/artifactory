@@ -1,0 +1,9 @@
+# (c) 2017 DataNexus Inc.  All Rights Reserved
+---
+# Install artifactory package
+- name: Install artifactory package
+  yum:
+    name: jfrog-artifactory-oss
+    state: present
+  become: true
+  environment: "{{environment_vars | default({})}}"

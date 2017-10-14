@@ -1,0 +1,23 @@
+# (c) 2017 DataNexus Inc.  All Rights Reserved
+---
+- block:
+  # start the artifactory service
+  - name: Start artifactory service
+    service:
+      name: artifactory
+      state: restarted
+  # pause for a few seconds after the service starts
+  - name: Pause for {{artifactory_restart_interval}} seconds after start
+    pause:
+      seconds: "{{artifactory_restart_interval}}"
+  # remove the '.deleteForSecurityMarker' file
+  - name: Remove .deleteForSecurityMarker file
+    file:
+      path: /var/opt/jfrog/artifactory/data/.deleteForSecurityMarker
+      state: absent
+  # and restart the artifactory service
+  - name: Restart artifactory service
+    service:
+      name: artifactory
+      state: restarted
+  become: true
