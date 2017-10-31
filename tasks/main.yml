@@ -1,14 +1,14 @@
 # (c) 2017 DataNexus Inc.  All Rights Reserved
 ---
-- include: install-required-packages.yml static=no
-- include: add-artifactory-user.yml static=no
-- include: add-artifactory-repo.yml static=no
-- include: install-artifactory.yml static=no
+- include_tasks: install-required-packages.yml
+- include_tasks: add-artifactory-user.yml
+- include_tasks: add-artifactory-repo.yml
+- include_tasks: install-artifactory.yml
 - include_role:
     name: configure-artifactory-nodes
-- include: enable-artifactory-service.yml static=no
-- include: start-artifactory-service.yml static=no
-- include: deploy-local-file.yml static=no
+- include_tasks: enable-artifactory-service.yml
+- include_tasks: start-artifactory-service.yml
+- include_tasks: deploy-local-file.yml
   with_items: "{{artifactory_upload_file_list}}"
   loop_control:
     loop_var: upload_filename

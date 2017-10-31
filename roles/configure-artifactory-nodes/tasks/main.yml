@@ -1,4 +1,4 @@
 # (c) 2017 DataNexus Inc.  All Rights Reserved
 ---
-- include: "configure-artifactory-server.yml static=no"
-- include: "add-binarystore-xml.yml static=no"
+- include_tasks: configure-artifactory-server.yml
+- include_tasks: add-binarystore-xml.yml
