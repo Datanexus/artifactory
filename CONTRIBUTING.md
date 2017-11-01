@@ -1,4 +1,4 @@
-## Contributing to dn-telegraf
+## Contributing to artifactory deploymnet playbook
 
 *Before opening a pull request* consider:
 
